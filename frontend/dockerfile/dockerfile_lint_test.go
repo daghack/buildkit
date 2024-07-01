@@ -41,7 +41,81 @@ var lintTests = integration.TestFuncs(
 	testBaseImagePlatformMismatch,
 	testAllTargetUnmarshal,
 	testRedundantTargetPlatform,
+	testSecretsUsedInArgOrEnv,
 )
+
+func testSecretsUsedInArgOrEnv(t *testing.T, sb integration.Sandbox) {
+	dockerfile := []byte(`
+FROM scratch
+ARG SECRET_PASSPHRASE
+ENV SUPER_Secret=foo
+ENV password=bar secret=baz
+ARG super_duper_secret_token=foo auth=bar
+ENV apikey=bar sunflower=foo
+ENV git_key=
+`)
+	checkLinterWarnings(t, sb, &lintTestParams{
+		Dockerfile: dockerfile,
+		Warnings: []expectedLintWarning{
+			{
+				RuleName:    "SecretsUsedInArgOrEnv",
+				Description: "Secrets should not be set as ARG or ENV",
+				Detail:      "Secrets should not be used in the ARG or ENV commands (key named 'SECRET_PASSPHRASE')",
+				Level:       1,
+				Line:        3,
+			},
+			{
+				RuleName:    "SecretsUsedInArgOrEnv",
+				Description: "Secrets should not be set as ARG or ENV",
+				Detail:      "Secrets should not be used in the ARG or ENV commands (key named 'SUPER_Secret')",
+				Level:       1,
+				Line:        4,
+			},
+			{
+				RuleName:    "SecretsUsedInArgOrEnv",
+				Description: "Secrets should not be set as ARG or ENV",
+				Detail:      "Secrets should not be used in the ARG or ENV commands (key named 'password')",
+				Level:       1,
+				Line:        5,
+			},
+			{
+				RuleName:    "SecretsUsedInArgOrEnv",
+				Description: "Secrets should not be set as ARG or ENV",
+				Detail:      "Secrets should not be used in the ARG or ENV commands (key named 'secret')",
+				Level:       1,
+				Line:        5,
+			},
+			{
+				RuleName:    "SecretsUsedInArgOrEnv",
+				Description: "Secrets should not be set as ARG or ENV",
+				Detail:      "Secrets should not be used in the ARG or ENV commands (key named 'super_duper_secret_token')",
+				Level:       1,
+				Line:        6,
+			},
+			{
+				RuleName:    "SecretsUsedInArgOrEnv",
+				Description: "Secrets should not be set as ARG or ENV",
+				Detail:      "Secrets should not be used in the ARG or ENV commands (key named 'auth')",
+				Level:       1,
+				Line:        6,
+			},
+			{
+				RuleName:    "SecretsUsedInArgOrEnv",
+				Description: "Secrets should not be set as ARG or ENV",
+				Detail:      "Secrets should not be used in the ARG or ENV commands (key named 'apikey')",
+				Level:       1,
+				Line:        7,
+			},
+			{
+				RuleName:    "SecretsUsedInArgOrEnv",
+				Description: "Secrets should not be set as ARG or ENV",
+				Detail:      "Secrets should not be used in the ARG or ENV commands (key named 'git_key')",
+				Level:       1,
+				Line:        8,
+			},
+		},
+	})
+}
 
 func testAllTargetUnmarshal(t *testing.T, sb integration.Sandbox) {
 	dockerfile := []byte(`
